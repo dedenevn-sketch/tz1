@@ -10,7 +10,7 @@ os.environ["PROCESS_SUCCESS_RATE"] = "1"
 
 import asyncio
 
-import pytest
+import pytest_asyncio
 from alembic import command
 from alembic.config import Config
 from httpx import ASGITransport, AsyncClient
@@ -50,7 +50,7 @@ async def _truncate(engine) -> None:
         await conn.execute(text("TRUNCATE TABLE payments, outbox RESTART IDENTITY CASCADE"))
 
 
-@pytest.fixture(scope="session", loop_scope="session")
+@pytest_asyncio.fixture(scope="session", loop_scope="session")
 async def engine():
     await asyncio.to_thread(_upgrade_schema)
     eng = create_async_engine(os.environ["DATABASE_URL"])
@@ -58,19 +58,19 @@ async def engine():
     await eng.dispose()
 
 
-@pytest.fixture(scope="session", loop_scope="session")
+@pytest_asyncio.fixture(scope="session", loop_scope="session")
 async def session_factory(engine):
     return async_sessionmaker(engine, expire_on_commit=False)
 
 
-@pytest.fixture(autouse=True, loop_scope="session")
+@pytest_asyncio.fixture(autouse=True, loop_scope="session")
 async def clean_tables(engine):
     await _truncate(engine)
     yield
     await _truncate(engine)
 
 
-@pytest.fixture(loop_scope="session")
+@pytest_asyncio.fixture(loop_scope="session")
 async def client(session_factory):
     app = create_app()
 

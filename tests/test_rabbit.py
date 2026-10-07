@@ -6,12 +6,12 @@ from datetime import timedelta
 from uuid import uuid4
 
 import aio_pika
-import pytest
+import pytest_asyncio
 
 from app.topology import declare_topology
 
 
-@pytest.fixture(loop_scope="session")
+@pytest_asyncio.fixture(loop_scope="session")
 async def topology():
     connection = await aio_pika.connect_robust(os.environ["RABBITMQ_URL"])
     channel = await connection.channel()
